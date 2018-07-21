@@ -2,10 +2,20 @@ import requests
 import json
 import logging
 import time
+import yaml
+import os
 # import execjs
 from kafka import KafkaProducer
 from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
+
+
+# 解析yaml
+cur_path = os.path.dirname(os.path.realpath(__file__))
+x = yaml.load(open('%s/config.yml' % cur_path))
+kafka_con = x['TOP']['KAFKA']['HOST']
+kafka_topic = x['TOP']['KAFKA']['topic']
+
 
 # 日志设置
 logging.basicConfig(level=logging.DEBUG,
@@ -37,15 +47,12 @@ def get_head(s):
 
 # 获取中间的图表数据
 def mid_msg(s):
-    mid_ls = []
+    mid_ls = {}
     try:
         for t in mid_type:
             re = requests.get('https://www.okex.com/v2/futures/pc/public/futureVolume.do?symbol=%s&type=%s' % (s, t), timeout=20)
             res = json.loads(re.text)['data']
-            dic = {
-                'data%s' % t :res
-                   }
-            mid_ls.append(dic)
+            mid_ls['data%s' % t] = res
             time.sleep(3)
     except Exception as e:
         logging.info("error-->%s" % e)
@@ -74,7 +81,7 @@ def foot_msg(s):
 # 启动函数
 def run():
     # 连接kafka
-    producer = KafkaProducer(bootstrap_servers='47.75.116.175:9092',
+    producer = KafkaProducer(bootstrap_servers=kafka_con,
                              value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     logging.info('kafka已连接')
     for s in symbol_ls:
@@ -97,7 +104,7 @@ def run():
             'list5': list5,
             'list6': list6,
         }
-        producer.send('webTop-test', dic)
+        producer.send(kafka_topic, dic)
         producer.flush()
         logging.info('-------send success------')
         time.sleep(5)

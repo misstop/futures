@@ -2,9 +2,18 @@ import requests
 import json
 import logging
 import time
+import os
+import yaml
 from kafka import KafkaProducer
 from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
+
+# 解析yaml
+cur_path = os.path.dirname(os.path.realpath(__file__))
+x = yaml.load(open('%s/config.yml' % cur_path))
+kafka_con = x['HOLDAMOUNT']['KAFKA']['HOST']
+kafka_topic = x['HOLDAMOUNT']['KAFKA']['topic']
+
 
 # 日志设置
 logging.basicConfig(level=logging.DEBUG,
@@ -27,7 +36,7 @@ symbols = ['f_usd_btc', 'f_usd_ltc', 'f_usd_eth', 'f_usd_etc', 'f_usd_bch', 'f_u
 
 # send to Kafka
 def send_msg():
-    producer = KafkaProducer(bootstrap_servers='47.75.116.175:9092',
+    producer = KafkaProducer(bootstrap_servers=kafka_con,
                              value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     logging.info('kafka已连接')
     for s in symbols:
@@ -45,7 +54,7 @@ def send_msg():
                 'coin': s[-3:].upper(),
                 'timestamp': cur_time(),
             }
-            producer.send('holdAmount-test', msg)
+            producer.send(kafka_topic, msg)
             time.sleep(5)
             logging.info('success to send kafka>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     producer.close()
