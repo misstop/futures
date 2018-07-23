@@ -18,7 +18,7 @@ kafka_topic = x['TOP']['KAFKA']['topic']
 
 
 # 日志设置
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s (filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
                     filename='okex_top.log',
