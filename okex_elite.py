@@ -58,7 +58,7 @@ def get_msg(s):
             time.sleep(5)
             alldata[maps[t]] = {
                 "dmi": dmi,
-                "avePosition": avePosition,
+                "avgPosition": avePosition,
             }
     except Exception as e:
         logging.info("error-->%s" % e)
@@ -77,8 +77,8 @@ def run():
         alldata = get_msg(s)
         logging.info('%s---crawl success' % s)
         dic = {
-            'coin': s,
-            'alldata': alldata,
+            'coin': s[-3:].upper(),
+            'allData': alldata,
         }
         producer.send(kafka_topic, dic)
         producer.flush()
