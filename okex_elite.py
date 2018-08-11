@@ -38,10 +38,12 @@ maps = {
 # 获取条形
 def get_msg(s):
     alldata = {}
-    dmi = {}
-    avePosition = {}
+    # dmi = {}
+    # avePosition = {}
     try:
         for t in chart_type:
+            dmi = {}
+            avePosition = {}
             res1 = requests.get('https://www.okex.com/v2/futures/pc/public/eliteScale.do?symbol=%s&type=%s' % (s, t),
                                 timeout=30)
             res1 = json.loads(res1.text)['data']
@@ -90,6 +92,7 @@ def run():
 
 SCHEDULER = BlockingScheduler()
 if __name__ == '__main__':
-    SCHEDULER.add_job(func=run, trigger='interval', minutes=5)
-    SCHEDULER.start()
+    run()
+    # SCHEDULER.add_job(func=run, trigger='interval', minutes=5)
+    # SCHEDULER.start()
 
